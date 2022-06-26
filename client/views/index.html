@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chessground Demo</title>
+    <link rel="stylesheet" type="text/css" href="css/chessground.base.css">
+    <link rel="stylesheet" type="text/css" href="css/chessground.brown.css">
+    <link rel="stylesheet" type="text/css" href="css/chessground.cburnett.css">
+    <style>
+        #chessground {
+            width: 500px;
+            height: 500px;
+        }
+
+        cg-board {
+            background-color: #bfcfdd;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script type="module">
+        import { Chessground } from '/js/chessground.js';
+        import { Chess } from '/js/chess.js'
+        import { config } from '/js/groundConfig.js'
+        import { playMoveSound, shuffle } from '/js/helpers.js'
+        import player from './js/index.js';
+        import { getPuzzle, getHundredPuzzleIds } from '/js/client.js'
+        var ids = await getHundredPuzzleIds() ?? ['00008']
+        console.log(`1array starts with ${ids[0]}`)
+        ids = shuffle(ids)
+        console.log(`2array starts with ${ids[0]}`)
+
+        var $score = $('#score')
+        var score = 0
+        // console.log(puzzle)
+        // var fen = puzzle.Fen
+        // var moves = puzzle.Moves
+        //  var game = new Chess(fen)
+        // const ground = Chessground(document.getElementById('chessground'), config)
+
+        // var fen = '2k5/R7/p7/5B1P/2p3P1/n3KP2/8/3q4 b - - 1 37'
+        // var moves = ['c8d8', 'a7d7', 'd1d7', 'f5d7', 'd8d7', 'h5h6', 'c4c3', 'f3f4', 'a3c2', 'e3d3', 'c2d4', 'h6h7']
+        var puzzle = null
+        var fen  = null
+        var moves = null
+        var game  = null
+        var ground  = null
+        ground = Chessground(document.getElementById('chessground'), config)
+        await initGame()
+        async function initGame(){
+            puzzle = await getPuzzle(ids.shift())
+            fen = puzzle.Fen
+            config.fen= fen
+            moves = puzzle.Moves
+            game = new Chess(fen)
+            console.log(fen)
+            var nextMoveTurn = game.turn() == 'w' ? 'black' : 'white'
+            config.turnColor =  nextMoveTurn
+            config.movable.color = nextMoveTurn
+            config.orientation = nextMoveTurn
+            ground.set(config)
+            movePiece(moves.shift())
+        }
+
+        function checkLegality(source, desct, capturedPiece){
+            console.log(source + ' to ' + desct)
+            var fenBeforeMove = game.fen()
+            var move = game.move({
+                from: source,
+                to: desct,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            })
+            // illegal move
+            if (move === null){
+                config.fen = fenBeforeMove
+                config.lastMove = undefined
+                ground.set(config)
+                playMoveSound(move, capturedPiece.captured)
+                return false
+            }
+            playMoveSound(move, capturedPiece.captured)
+            return true
+        }
+
+        function onInsert(){
+            // console.log('onInsert')
+        }
+        function onSelect(key){
+            console.log('onSelect') 
+        }
+        function ondropNewPiece(){
+             console.log('ondropNewPiece')
+        }
+        function onafterNewPiece(){
+             console.log('onafterNewPiece')
+        }
+        function onChange(source, desct, metadata){
+             console.log('On change!')
+            
+        }
+        function onMove(source, desct, capturedPiece){
+             console.log('On move!')
+             var destPiece = game.get(desct)
+            // if (destPiece !== null && (destPiece.color == game.turn())){
+            // console.log('cancelMove')
+            // console.log(config.draggable)
+            // ground.cancelMove()
+            // var fenBeforeMove = game.fen()
+            // config.fen = fenBeforeMove
+            // config.lastMove = undefined
+            // ground.set(config)
+            // ground.selectSquare(desct)
+            // }
+        }
+      
+        async function onAfterMove(source, desct, metadata){
+            console.log('onAfterMove')
+            if (!checkLegality(source, desct, metadata)){
+                return false
+            }
+            config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
+            config.movable.color = config.turnColor
+            fen = game.fen()
+            config.fen = fen
+            ground.set(config)
+
+            if (source+desct == moves.shift()){
+                if (moves.length == 0){
+                    console.log('WIN')
+                    score += 1
+                    $score.html(score)
+                    setTimeout(1300)
+                    await initGame()
+                    ground.redrawAll()
+                }
+                else if (moves.length > 0){
+                    movePiece(moves.shift())
+                }
+            } 
+            else{
+                console.log('LOST')
+                score = 0
+                $score.html(score)
+            }
+        }
+
+        function movePiece(uci){
+            var start = uci.substr(0,2)
+            var end  = uci.substr(2,2)
+            var promotion = uci.substr(4,1)
+            var game_move = {from: start, to: end, promotion: promotion}
+            
+            ground.move(start, end)
+            var move = game.move({
+                from: start,
+                to: end,
+                promotion: promotion})
+
+            fen = game.fen()
+            config.fen = fen
+            ground.set(config)
+            config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
+            config.movable.color = config.turnColor
+            ground.set(config)
+            playMoveSound(move, move.captured)
+        }
+
+        config.movable = {
+                free: true,
+                events: {
+                    after: onAfterMove
+                }
+            }
+        config.events ={
+                change: onChange,
+                move: onMove,
+                select: onSelect,
+                insert: onInsert,
+                dropNewPiece: ondropNewPiece,
+                afterNewPiece: onafterNewPiece
+            } 
+        fen = game.fen()
+        config.fen = fen
+        ground.set(config)
+        
+        
+    </script>
+</head>
+<body>
+    <div id="chessground"></div>
+    <span>Score is: <span id="score">0</span></span>
+    
+</body>
+</html>
