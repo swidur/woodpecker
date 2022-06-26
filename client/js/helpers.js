@@ -31,6 +31,5 @@ function shuffle(array) {
     return array;
   }
 
-
 export { playMoveSound as playMoveSound }
 export { shuffle as shuffle }

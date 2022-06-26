@@ -27,10 +27,8 @@
         import player from './js/index.js';
         import { getPuzzle, getHundredPuzzleIds } from '/js/client.js'
         var ids = await getHundredPuzzleIds() ?? ['00008']
-        console.log(`1array starts with ${ids[0]}`)
+        // var ids =  ['Y0vaH']
         ids = shuffle(ids)
-        console.log(`2array starts with ${ids[0]}`)
-
         var $score = $('#score')
         var score = 0
         // console.log(puzzle)
@@ -47,7 +45,9 @@
         var game  = null
         var ground  = null
         ground = Chessground(document.getElementById('chessground'), config)
+
         await initGame()
+
         async function initGame(){
             puzzle = await getPuzzle(ids.shift())
             fen = puzzle.Fen
@@ -66,10 +66,11 @@
         function checkLegality(source, desct, capturedPiece){
             console.log(source + ' to ' + desct)
             var fenBeforeMove = game.fen()
+            
             var move = game.move({
                 from: source,
-                to: desct,
-                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+                to: desct.substr(0,2),
+                promotion: desct.substr(2,1) ?? 'q' // promote to queen if all else fails
             })
             // illegal move
             if (move === null){
@@ -87,45 +88,46 @@
             // console.log('onInsert')
         }
         function onSelect(key){
-            console.log('onSelect') 
+            // console.log('onSelect') 
         }
         function ondropNewPiece(){
-             console.log('ondropNewPiece')
+            //  console.log('ondropNewPiece')
         }
         function onafterNewPiece(){
-             console.log('onafterNewPiece')
+            //  console.log('onafterNewPiece')
         }
         function onChange(source, desct, metadata){
-             console.log('On change!')
+            //  console.log('On change!')
             
         }
         function onMove(source, desct, capturedPiece){
-             console.log('On move!')
-             var destPiece = game.get(desct)
-            // if (destPiece !== null && (destPiece.color == game.turn())){
-            // console.log('cancelMove')
-            // console.log(config.draggable)
-            // ground.cancelMove()
-            // var fenBeforeMove = game.fen()
-            // config.fen = fenBeforeMove
-            // config.lastMove = undefined
-            // ground.set(config)
-            // ground.selectSquare(desct)
-            // }
+            //  console.log('On move!')
         }
       
         async function onAfterMove(source, desct, metadata){
             console.log('onAfterMove')
+            // Promotion logic
+            var destRow = desct.substr(1,1)
+            var promotedPiece = ''
+            var movedPieceIsPawn = game.get(source).type == 'p'
+            if(movedPieceIsPawn && (destRow == '8' || destRow == '1')){
+                promotedPiece = getPromotedPiece()
+            }
+            desct = desct + promotedPiece
+
+            // Checking if move is legal
             if (!checkLegality(source, desct, metadata)){
                 return false
             }
+
             config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
             config.movable.color = config.turnColor
             fen = game.fen()
             config.fen = fen
             ground.set(config)
-
-            if (source+desct == moves.shift()){
+            var nextMove = moves.shift()
+            console.log(source+desct +' --- ' + nextMove)
+            if (source+desct == nextMove || game.game_over()){
                 if (moves.length == 0){
                     console.log('WIN')
                     score += 1
@@ -135,13 +137,12 @@
                     ground.redrawAll()
                 }
                 else if (moves.length > 0){
+                    console.log('next move')
                     movePiece(moves.shift())
                 }
             } 
             else{
-                console.log('LOST')
-                score = 0
-                $score.html(score)
+                resetGui()
             }
         }
 
@@ -166,6 +167,11 @@
             playMoveSound(move, move.captured)
         }
 
+        function resetGui(){
+            console.log('RESET')
+            score = 0
+            $score.html(score)
+        }
         config.movable = {
                 free: true,
                 events: {
@@ -184,12 +190,31 @@
         config.fen = fen
         ground.set(config)
         
+        const element = document.getElementById("reset");
+        element.addEventListener("click", function() {
+            initGame()
+            ground.redrawAll()
+            resetGui()
+        });
         
+        function getPromotedPiece(){
+            // if (!confirm('You want a queen?')){
+            //     if (!confirm('You want a horsey?')){
+
+            //     }
+            // } else return 'q'
+
+           return confirm('You want a queen?') ? 'q' :
+                    confirm('You want a rook?') ? 'r' :
+                        confirm('You want a horsey?') ? 'n' : 'q'
+        }
+    
     </script>
 </head>
 <body>
     <div id="chessground"></div>
     <span>Score is: <span id="score">0</span></span>
-    
+    <button id="reset">Restart</button>
+
 </body>
 </html>
