@@ -204,9 +204,11 @@
             //     }
             // } else return 'q'
 
-           return confirm('You want a queen?') ? 'q' :
-                    confirm('You want a rook?') ? 'r' :
-                        confirm('You want a horsey?') ? 'n' : 'q'
+           return   confirm('You want a queen?') ? 'q' :
+                        confirm('You want a rook?') ? 'r' :
+                            confirm('You want a horsey?') ? 'n' : 
+                                confirm('You want a bisop?') ? 'b' 
+                                    : 'q' 
         }
     
     </script>
