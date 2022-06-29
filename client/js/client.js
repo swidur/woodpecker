@@ -11,12 +11,12 @@ async function getData(ajaxurl) {
   };
   
 async function getPuzzle(puzzleId){
-    var url = `${baseUrl}/puzzle/${puzzleId}` 
+    var url = `http://${baseUrl}/puzzle/${puzzleId}` 
     const res = await getData(url)
     return res
  }  
 async function getHundredPuzzleIds(puzzleId){
-    var url = `${baseUrl}/puzzleList` 
+    var url = `http://${baseUrl}/puzzleList` 
     const res = await getData(url)
     return res
  }
