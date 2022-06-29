@@ -9,12 +9,13 @@
     <link rel="stylesheet" type="text/css" href="css/chessground.cburnett.css">
     <style>
         #chessground {
-            width: 500px;
-            height: 500px;
+            width: 700px;
+            height: 700px;
         }
 
         cg-board {
-            background-color: #bfcfdd;
+            background-color: #e9d5b0
+
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -196,6 +197,8 @@
             ground.redrawAll()
             resetGui()
         });
+
+        document.getElementById('sizeRange').oninput = function(){resizeBoard()}; 
         
         function getPromotedPiece(){
             // if (!confirm('You want a queen?')){
@@ -210,6 +213,13 @@
                                 confirm('You want a bisop?') ? 'b' 
                                     : 'q' 
         }
+
+        function resizeBoard(){
+            var newSize = document.getElementById('sizeRange').value
+            console.log(newSize)
+            document.getElementById('chessground').style.height = newSize + 'px'
+            document.getElementById('chessground').style.width = newSize  + 'px'
+        }
     
     </script>
 </head>
@@ -217,6 +227,9 @@
     <div id="chessground"></div>
     <span>Score is: <span id="score">0</span></span>
     <button id="reset">Restart</button>
+    <div class="slidecontainer" >
+        <input autocomplete="off" type="range" min="400" max="1200" value="700" class="slider" id="sizeRange">
+    </div>
 
 </body>
 </html>

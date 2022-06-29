@@ -1,7 +1,7 @@
 const groundConfig = {
     orientation: 'white',
     turnColor: 'black',
-    coordinates: true,
+    coordinates: false,
     ranksPosition: 'right',
     autoCastle: true,
     viewOnly: false,
