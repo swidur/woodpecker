@@ -62,6 +62,10 @@
             config.orientation = nextMoveTurn
             ground.set(config)
             movePiece(moves.shift())
+            if (ids.length < 10){
+                var newIds =  await getHundredPuzzleIds()
+                ids = ids.concat(newIds)
+            }
         }
 
         function checkLegality(source, desct, capturedPiece){
