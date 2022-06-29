@@ -1,17 +1,7 @@
 var script = document.createElement('script');
 script.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
 document.getElementsByTagName('head')[0].appendChild(script);
-
-// function getPuzzle(puzzleId){
-//     const Http = new XMLHttpRequest();
-//     var url = `http://localhost:9090/puzzle/${puzzleId}` 
-//     Http.open("GET", url);
-//     Http.send();
-    
-//     Http.onreadystatechange = (e) => {
-//       console.log(Http.responseText)
-//     }
-// }
+var baseUrl = 'localhost:9090'
 
 async function getData(ajaxurl) { 
     return $.ajax({
@@ -21,12 +11,12 @@ async function getData(ajaxurl) {
   };
   
 async function getPuzzle(puzzleId){
-    var url = `http://localhost:9090/puzzle/${puzzleId}` 
+    var url = `${baseUrl}/puzzle/${puzzleId}` 
     const res = await getData(url)
     return res
  }  
 async function getHundredPuzzleIds(puzzleId){
-    var url = `http://localhost:9090/puzzleList` 
+    var url = `${baseUrl}/puzzleList` 
     const res = await getData(url)
     return res
  }
