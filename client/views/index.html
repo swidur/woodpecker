@@ -28,18 +28,9 @@
         import player from './js/index.js';
         import { getPuzzle, getHundredPuzzleIds } from '/js/client.js'
         var ids = await getHundredPuzzleIds() ?? ['00008']
-        // var ids =  ['Y0vaH']
         ids = shuffle(ids)
         var $score = $('#score')
         var score = 0
-        // console.log(puzzle)
-        // var fen = puzzle.Fen
-        // var moves = puzzle.Moves
-        //  var game = new Chess(fen)
-        // const ground = Chessground(document.getElementById('chessground'), config)
-
-        // var fen = '2k5/R7/p7/5B1P/2p3P1/n3KP2/8/3q4 b - - 1 37'
-        // var moves = ['c8d8', 'a7d7', 'd1d7', 'f5d7', 'd8d7', 'h5h6', 'c4c3', 'f3f4', 'a3c2', 'e3d3', 'c2d4', 'h6h7']
         var puzzles = []
         var fen  = null
         var moves = null
@@ -48,13 +39,14 @@
         ground = Chessground(document.getElementById('chessground'), config)
 
         await initGame()
-        async function queuePuzzles(cnt){
+        async function queuePuzzles(cnt, max){
+            console.log(' Queued puzzles: ' + puzzles.length)
+            if (puzzles.length > max) return
             for (var i =0; i < cnt; i++){
                 var id = ids.shift()
                 if (id != undefined){
                     var puzzle = await getPuzzle(id)
                     puzzles.push(puzzle)
-                console.log(id + ' Queued puzzles: ' + puzzles.length)
                 }
             }
         }
@@ -81,7 +73,7 @@
                 var newIds =  await getHundredPuzzleIds()
                 ids = ids.concat(newIds)
             }
-            queuePuzzles(5)
+            queuePuzzles(5,10)
         }
 
         function checkLegality(source, desct, capturedPiece){
@@ -221,12 +213,6 @@
         document.getElementById('sizeRange').oninput = function(){resizeBoard()}; 
         
         function getPromotedPiece(){
-            // if (!confirm('You want a queen?')){
-            //     if (!confirm('You want a horsey?')){
-
-            //     }
-            // } else return 'q'
-
            return   confirm('You want a queen?') ? 'q' :
                         confirm('You want a rook?') ? 'r' :
                             confirm('You want a horsey?') ? 'n' : 
