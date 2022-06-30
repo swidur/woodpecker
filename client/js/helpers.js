@@ -31,6 +31,34 @@ function shuffle(array) {
     return array;
   }
 
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  let expires = "expires="+ d.toUTCString();
+  var c = cname + "=" + cvalue + ";" + expires + ";path=/"
+  console.log(c)
+  document.cookie = c ;
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
 
 export { playMoveSound as playMoveSound }
 export { shuffle as shuffle }
+export { setCookie as setCookie }
+export { getCookie as getCookie }
+

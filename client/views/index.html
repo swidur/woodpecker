@@ -21,12 +21,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
     <script type="module">
+        setIdGui()
         import { Chessground } from '/js/chessground.js';
         import { Chess } from '/js/chess.js'
         import { config } from '/js/groundConfig.js'
-        import { playMoveSound, shuffle } from '/js/helpers.js'
+        import { playMoveSound, shuffle, getCookie, setCookie } from '/js/helpers.js'
         import player from './js/index.js';
         import { getPuzzle, getHundredPuzzleIds } from '/js/client.js'
+        
         var ids = await getHundredPuzzleIds() ?? ['00008']
         ids = shuffle(ids)
         var $score = $('#score')
@@ -40,13 +42,13 @@
 
         await initGame()
         async function queuePuzzles(cnt, max){
-            console.log(' Queued puzzles: ' + puzzles.length)
             if (puzzles.length > max) return
             for (var i =0; i < cnt; i++){
                 var id = ids.shift()
                 if (id != undefined){
                     var puzzle = await getPuzzle(id)
                     puzzles.push(puzzle)
+                    console.log(' Queued puzzles: ' + puzzles.length)
                 }
             }
         }
@@ -226,16 +228,52 @@
             document.getElementById('chessground').style.height = newSize + 'px'
             document.getElementById('chessground').style.width = newSize  + 'px'
         }
-    
+
+        function setIdGui(){
+            var userid = getCookie("UserId")
+            console.log('current user is: '+userid)
+            if (userid == ''){
+                userIdNotSet()
+                return
+            }
+            userIdIsSet(userid)
+        }
+
+        function userIdIsSet(textValue){
+            document.getElementById("idTextField").placeholder = "Logged in as: " + textValue
+        }
+
+        function userIdNotSet(){
+            document.getElementById("idTextField").placeholder = 'Enter login here'
+        }
+
+        document.getElementById('idButton').addEventListener("click", function(){
+            var textFieldValue = document.getElementById("idTextField").value
+            if (!(textFieldValue.trim() === '')){ // string empty or whitespace
+                setCookie("UserId", textFieldValue, 30)
+                document.getElementById("idTextField").value = ''
+                userIdIsSet(textFieldValue)
+            } else{
+                var placeholderDefault =  document.getElementById("idTextField").placeholder == "Enter login here"
+                if (!placeholderDefault && confirm('Wanna logout, kiddo?')){
+                    setCookie("UserId", null, -1)
+                    userIdNotSet()
+                }
+            }
+        }) 
+
     </script>
 </head>
-<body>
     <div id="chessground"></div>
     <span>Score is: <span id="score">0</span></span>
     <button id="reset">Restart</button>
     <div class="slidecontainer" >
-        <input autocomplete="off" type="range" min="400" max="1200" value="700" class="slider" id="sizeRange">
+    <input autocomplete="off" type="range" min="400" max="1200" value="700" class="slider" id="sizeRange">
     </div>
-
+    
+    <div style="display: inline-flex;">
+        <input autocomplete="off" id="idTextField" type="text" placeholder="Enter login here">
+        <button style="margin-left: 10px" id="idButton">Login</button>
+    </div>
 </body>
 </html>
