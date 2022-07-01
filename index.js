@@ -17,7 +17,7 @@ mountRoutes(app)
 app.use(compression())
 app.use(minify())
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico', { maxAge: 31557600 })))
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 app.use("/css", express.static(__dirname + '/node_modules/chessground/assets', { maxAge: 31557600 }));
 app.use("/js", express.static(__dirname + '/node_modules/chessground', { maxAge: 31557600 }));
 app.use("/js", express.static(__dirname + '/node_modules/chess.js', { maxAge: 31557600 }));
