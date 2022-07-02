@@ -36,7 +36,6 @@ function setCookie(cname, cvalue, exdays) {
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
   let expires = "expires="+ d.toUTCString();
   var c = cname + "=" + cvalue + ";" + expires + ";path=/"
-  console.log(c)
   document.cookie = c ;
 }
 
@@ -56,9 +55,25 @@ function getCookie(cname) {
   return "";
 }
 
+function addToTable(element, parent){
+  var table = document.getElementById(parent);
+  console.log(table)
+  let tableRow = document.createElement("tr");
+  for (let i=0; i< element.length; i++){
+    let tableCell = document.createElement('td')
+    tableCell.innerHTML = element[i]
+    tableRow.appendChild(tableCell)
+  }
+  table.appendChild(tableRow)
+}
+
+function buildAnchorTag(text, link, newTab=true){
+  return `<a href="${link}" ${newTab ? 'target="_blank" rel="noopener noreferrer"' : ''}>${text}</a>`
+}
 
 export { playMoveSound as playMoveSound }
 export { shuffle as shuffle }
 export { setCookie as setCookie }
 export { getCookie as getCookie }
-
+export { addToTable as addToTable }
+export { buildAnchorTag as buildAnchorTag }

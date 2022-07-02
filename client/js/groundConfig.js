@@ -16,7 +16,7 @@ const groundConfig = {
     },
     animation: {
     enabled: true,
-    duration: 200,
+    duration: 300,
     },
     movable: {
     free: false,
