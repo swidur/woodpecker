@@ -14,7 +14,7 @@ function playMoveSound(move, capturedPiece){
 }
 
 function shuffle(array) {
-    var m = array.length, t, i;
+  var m = array.length, t, i;
   
     // While there remain elements to shuffle…
     while (m) {
@@ -27,8 +27,7 @@ function shuffle(array) {
       array[m] = array[i];
       array[i] = t;
     }
-  
-    return array;
+        return array;
   }
 
 function setCookie(cname, cvalue, exdays) {
@@ -57,7 +56,6 @@ function getCookie(cname) {
 
 function addToTable(element, parent){
   var table = document.getElementById(parent);
-  console.log(table)
   let tableRow = document.createElement("tr");
   for (let i=0; i< element.length; i++){
     let tableCell = document.createElement('td')
