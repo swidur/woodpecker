@@ -29,8 +29,7 @@
         import player from './js/index.js';
         import { getPuzzle, getHundredPuzzleIds } from '/js/client.js'
         
-        var ids = await getHundredPuzzleIds() ?? ['00008']
-        ids = shuffle(ids)
+
         var $score = $('#score')
         var score = 0
         var puzzles = []
@@ -41,9 +40,13 @@
         var ground  = null
         var solved = []
         var tries = 1
+        var sound = document.getElementById('soundSwitch').checked
         var vieportSize = Math.min(top.innerHeight, top.innerWidth)
         ground = Chessground(document.getElementById('chessground'), config)
-
+        adjustSizeRange(vieportSize)
+        resizeBoard()
+        var ids = await getHundredPuzzleIds() ?? ['00008']
+        ids = shuffle(ids)
         await initGame()
         async function queuePuzzles(cnt, max){
             if (puzzles.length > max) return
@@ -52,7 +55,6 @@
                 if (id != undefined){
                     var puzzle = await getPuzzle(id)
                     puzzles.push(puzzle)
-                    // console.log(' Queued puzzles: ' + puzzles.length)
                 }
             }
         }
@@ -61,7 +63,6 @@
             if (puzzles.length == 0){
                 puzzle = await getPuzzle(ids.shift())
                 puzzles.push(puzzle)
-                // console.log('waiting for puzzle')
             }
             puzzle = puzzles.shift()
             fen = puzzle.Fen
@@ -98,7 +99,8 @@
                 ground.set(config)
                 return false
             }
-            playMoveSound(move, capturedPiece.captured)
+            console.log("sound: " + sound)
+            sound ? playMoveSound(move, capturedPiece.captured) : null
             return true
         }
 
@@ -152,8 +154,7 @@
                     $score.html(score)
                     setTimeout(1300)
                     await initGame()
-                    ground.redrawAll()
-                    
+                    ground.redrawAll()                   
                     addToTable([tries, score, buildAnchorTag(puzzle.PuzzleId, puzzle.GameUrl), 0], "solvedList")
                 }
                 else if (moves.length > 0){
@@ -183,7 +184,7 @@
             config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
             config.movable.color = config.turnColor
             ground.set(config)
-            playMoveSound(move, move.captured)
+            sound ? playMoveSound(move, move.captured) : null
         }
 
         function resetGui(){
@@ -217,6 +218,7 @@
         });
 
         document.getElementById('sizeRange').onclick = function(){resizeBoard()}; 
+        document.getElementById('soundSwitch').onclick = function(){sound = !sound}; 
         
         function getPromotedPiece(){
            return   confirm('You want a queen?') ? 'q' :
@@ -267,22 +269,18 @@
 
         $(window).resize(function() {
             var sizeRangeValue = document.getElementById('sizeRange').value
-            // console.log(`resize:sizeRangeValue ${sizeRangeValue} vieport: ${vieportSize}, innerHeight: ${top.innerHeight}, ${top.innerWidth}`)
-            var newValue = ((sizeRangeValue / vieportSize) *  Math.min(top.innerHeight, top.innerWidth)) -30
-            // console.log("OnResize::adjust to: " + newValue)
+            var newValue = ((sizeRangeValue / vieportSize) *  Math.min(top.innerHeight, top.innerWidth)) -50
             adjustSizeRange(newValue)
             resizeBoard()
             vieportSize =  Math.min(top.innerHeight, top.innerWidth)
         })
 
         function adjustSizeRange(newValue){
-            var maxHeight =  Math.min(top.innerHeight, top.innerWidth) -30
+            var maxHeight =  Math.min(top.innerHeight, top.innerWidth) -50
             document.getElementById('sizeRange').max = maxHeight
             document.getElementById('sizeRange').value = newValue
         }
-        // console.log(`size on startup: vieport: ${vieportSize}, innerHeight: ${top.innerHeight}, ${top.innerWidth}`)
-        adjustSizeRange(vieportSize)
-        resizeBoard()
+    
 
     </script>
 </head>
@@ -307,7 +305,10 @@
                         <input autocomplete="off" id="idTextField" type="text" placeholder="Enter login here">
                         <button class="btn-info" style="margin-left: 10px" id="idButton">Login</button>
                     </div>
-            
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="soundSwitch">
+                        <label class="custom-control-label" for="soundSwitch">Sound</label>
+                    </div>
                     <div >
                         <table class="table-secondary table-bordered mt-1" id="solvedList">
                             <tr>
