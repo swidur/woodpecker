@@ -1,9 +1,5 @@
 function playMoveSound(move, capturedPiece){
-
-    if (move === null){
-        return
-    }
-    else if (capturedPiece != undefined){
+    if (capturedPiece != undefined){
         var audio = new Audio('../sounds/Capture.mp3')
         audio.play()
         return

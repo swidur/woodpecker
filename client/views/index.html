@@ -84,23 +84,12 @@
         }
 
         function checkLegality(source, desct, capturedPiece){
-            console.log(source + ' to ' + desct)
-            var fenBeforeMove = game.fen()
-            
             var move = game.move({
                 from: source,
                 to: desct.substr(0,2),
                 promotion: desct.substr(2,1) ?? 'q' // promote to queen if all else fails
             })
-            // illegal move
-            if (move === null){
-                config.fen = fenBeforeMove
-                config.lastMove = undefined
-                ground.set(config)
-                return false
-            }
-            console.log("sound: " + sound)
-            sound ? playMoveSound(move, capturedPiece.captured) : null
+            if (move === null) return false
             return true
         }
 
@@ -130,16 +119,21 @@
             var destRow = desct.substr(1,1)
             var promotedPiece = ''
             var movedPieceIsPawn = game.get(source).type == 'p'
-            if(movedPieceIsPawn && (destRow == '8' || destRow == '1')){
-                promotedPiece = getPromotedPiece()
-            }
-            desct = desct + promotedPiece
+            var fenBeforeMove = game.fen()
 
             // Checking if move is legal
             if (!checkLegality(source, desct, metadata)){
+                config.fen = fenBeforeMove
+                config.lastMove = undefined
+                ground.set(config)
                 return false
             }
+            
+            if(movedPieceIsPawn && (destRow == '8' || destRow == '1')){
+                promotedPiece = getPromotedPiece()
+            }
 
+            desct = desct + promotedPiece
             config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
             config.movable.color = config.turnColor
             fen = game.fen()
@@ -147,6 +141,7 @@
             ground.set(config)
             var nextMove = moves.shift()
             console.log(source+desct +' --- ' + nextMove)
+            sound ? playMoveSound(capturedPiece.captured) : null
             if (source+desct == nextMove || game.game_over()){
                 if (moves.length == 0){
                     console.log('WIN')
@@ -184,7 +179,7 @@
             config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
             config.movable.color = config.turnColor
             ground.set(config)
-            sound ? playMoveSound(move, move.captured) : null
+            sound ? playMoveSound(move.captured) : null
         }
 
         function resetGui(){
