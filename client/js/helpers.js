@@ -1,4 +1,4 @@
-function playMoveSound(move, capturedPiece){
+function playMoveSound(capturedPiece){
     if (capturedPiece != undefined){
         var audio = new Audio('../sounds/Capture.mp3')
         audio.play()
