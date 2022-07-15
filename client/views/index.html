@@ -86,11 +86,23 @@
         }
 
         function checkLegality(source, desct, capturedPiece){
+            var fenBeforeMove = game.fen()
+            var isPawn = game.get(source).type == 'p'
             var move = game.move({
-                from: source,
-                to: desct.substr(0,2),
-                promotion: desct.substr(2,1) ?? 'q' // promote to queen if all else fails
+                    from: source,
+                    to: desct.substr(0,2),
+                    promotion: 'q' // promote to queen
             })
+            var destRow = desct.substr(1,1)
+            if (move != null & isPawn & (destRow == '8' || destRow == '1')){
+                game.load(fenBeforeMove)
+                var promotionPiece = getPromotedPiece()
+                move = game.move({
+                    from: source,
+                    to: desct.substr(0,2),
+                    promotion:  promotionPiece // promote to chosen promotion piece
+                })
+            }
             return move
         }
 
@@ -117,25 +129,17 @@
         async function onAfterMove(source, desct, metadata){
             // console.log('onAfterMove')
             // Promotion logic
-            var destRow = desct.substr(1,1)
-            var promotedPiece = ''
-            var movedPieceIsPawn = game.get(source).type == 'p'
             var fenBeforeMove = game.fen()
 
             // Checking if move is legal
             var move = checkLegality(source, desct, metadata)
-            if (move === null){
+            if (move === null ){
                 config.fen = fenBeforeMove
                 config.lastMove = undefined
                 ground.set(config)
                 return false
             }
 
-            if(movedPieceIsPawn && (destRow == '8' || destRow == '1')){
-                promotedPiece = getPromotedPiece()
-            }
-
-            desct = desct + promotedPiece
             config.turnColor =  game.turn() == 'w' ? 'white' : 'black'
             config.movable.color = config.turnColor
             fen = game.fen()
@@ -222,8 +226,8 @@
            return   confirm('You want a queen?') ? 'q' :
                         confirm('You want a rook?') ? 'r' :
                             confirm('You want a horsey?') ? 'n' : 
-                                confirm('You want a bisop?') ? 'b' 
-                                    : 'q' 
+                                confirm('You want a bishop?') ? 'b' 
+                                    : ''
         }
 
         function resizeBoard(){
