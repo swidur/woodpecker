@@ -1,2 +1,0 @@
-/8/1P1Pq1n1/4P1P1/P2P3P/RN3RK1 w - - 1 18,both e4g2 and e4h1 win
-3r1rk1/ppp2pp1/1bp4p/7R/3P2B1/2P1B3/qP1Q1P2/2K3R1 w - - 0 20,underpromotion

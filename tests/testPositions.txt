@@ -1,0 +1,4 @@
+puzzleId;description
+YazWS;Any checkmate is valid solution, both e4g2 and e4h1 win
+Y299V;Underpromotion
+XOG5Z;Promotion
