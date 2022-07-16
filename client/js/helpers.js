@@ -26,11 +26,11 @@ function shuffle(array) {
         return array;
   }
 
-function setCookie(cname, cvalue, exdays) {
+function setCookie(cname, cvalue, exdays=30) {
   const d = new Date();
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
   let expires = "expires="+ d.toUTCString();
-  var c = cname + "=" + cvalue + ";" + expires + ";path=/"
+  var c = cname + "=" + cvalue + ";" + expires + ';SameSite=Lax' + ";path=/"
   document.cookie = c ;
 }
 
