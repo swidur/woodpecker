@@ -7,10 +7,13 @@ var {query} = require('./db/index.js')
 var cors = require('cors')
 var compression = require('compression')
 var minify = require('express-minify');
+var bodyParser = require('body-parser')
 
 logger.setLevel('debug')
 
 const app =express()
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 app.use(cors())
 mountRoutes(app)
 

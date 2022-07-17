@@ -22,15 +22,15 @@
     </style>
 
     <script type="module">
-        setIdGui()
         import { Chessground } from '/js/chessground.js';
         import { Chess } from '/js/chess.js'
         import { config } from '/js/groundConfig.js'
         import { playMoveSound, shuffle, getCookie, setCookie, addToTable, buildAnchorTag } from '/js/helpers.js'
         import player from './js/index.js';
-        import { getPuzzle, getHundredPuzzleIds } from '/js/client.js'
+        import { getPuzzle, getHundredPuzzleIds, postSolvedPuzzle, getSolveHistory } from '/js/client.js'
         import { UserSettings } from './js/userSettings.js'
         
+        var userId = null
         var userSettings = new UserSettings()
         var $score = $('#score')
         var score = 0
@@ -45,6 +45,7 @@
         var vieportSize = Math.min(top.innerHeight, top.innerWidth)
         var timeStart = null
         ground = Chessground(document.getElementById('chessground'), config)
+        setIdGui()
         adjustSizeRange(vieportSize)
         resizeBoard()
         setUserControls()
@@ -155,14 +156,16 @@
             userSettings.soundOn ? playMoveSound(move.captured) : null
             if (source+desct == nextMove || game.game_over()){
                 if (moves.length == 0){
-                    var time = (new Date().getTime() - timeStart) / 1000
-                    console.log('WIN')
+                    puzzle.STime = new Date().getTime() - timeStart
+                    if (userId != null){
+                        postSolvedPuzzle(puzzle, userId)   
+                    }                           console.log('WIN')
                     score += 1
                     $score.html(score)
+                    addToTable([tries, score, buildAnchorTag(puzzle.PuzzleId, puzzle.GameUrl), puzzle.STime/ 1000], "solvedList")
                     setTimeout(1300)
                     await initGame()
-                    ground.redrawAll()                   
-                    addToTable([tries, score, buildAnchorTag(puzzle.PuzzleId, puzzle.GameUrl), time], "solvedList")
+                    ground.redrawAll() 
                 }
                 // play next move 
                 else if (moves.length > 0){ 
@@ -251,6 +254,20 @@
         document.getElementById('sizeRange').onclick = function(){resizeBoard()}; 
         document.getElementById('soundSwitch').onclick = function(){userSettings.soundOn = !userSettings.soundOn}; 
         document.getElementById('showCorrectMoveSwitch').onclick = function(){userSettings.showCorrectMove = !userSettings.showCorrectMove}; 
+        document.getElementById('results').onclick = async function(){
+            const parent = document.getElementById("resultList")
+            while (parent.firstChild) {
+                parent.firstChild.remove()
+            }
+            let result = await getSolveHistory(userId)
+            for(let i = 0; i < result.length; i++){
+                let row = result[i]
+                let tr = [i+1+'.', buildAnchorTag(row[0], row[3]), row[1]/1000, row[2]]
+                addToTable(tr, "resultList")
+            }
+            jQuery.noConflict();
+                $('#resultsModal').modal('toggle');
+        }; 
 
         function resizeBoard(){
             var newSize = document.getElementById('sizeRange').value
@@ -259,13 +276,13 @@
         }
 
         function setIdGui(){
-            var userid = getCookie("UserId")
-            console.log('current user is: '+userid)
-            if (userid == ''){
+            userId = getCookie("UserId")
+            if (userId === '') userId = null
+            if (userId === null){
                 userIdNotSet()
                 return
             }
-            userIdIsSet(userid)
+            userIdIsSet(userId)
         }
 
         function userIdIsSet(textValue){
@@ -323,6 +340,7 @@
                     <button class="btn-danger" id="reset">Restart</button>
   
                     <a id="settings" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-gear" style="font-size:24px"></i></a>
+                    <a id="results"><i class="fa fa-book" style="font-size:24px"></i></a>
                     <div >
                         <table class="table-secondary table-bordered mt-1" id="solvedList">
                             <tr>
@@ -367,6 +385,35 @@
                 <div style="display: inline-flex;">
                     <input autocomplete="off" id="idTextField" type="text" placeholder="Enter login here">
                     <button class="btn-info" style="margin-left: 10px" id="idButton">Login</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Results Modal -->
+    <div id="resultsModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Previous results</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div >
+                    <table class="table-secondary table-bordered mt-1" id="resultList">
+                        <tr>
+                            <th>Lp.</th>
+                            <th>Puzzle</th>
+                            <th>Time</th>
+                            <th>Date</th>
+                        </tr>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer">
