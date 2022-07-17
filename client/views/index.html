@@ -77,8 +77,10 @@
             config.turnColor =  nextMoveTurn
             config.movable.color = nextMoveTurn
             config.movable.free = true
+            config.viewOnly = false
             config.orientation = nextMoveTurn
             ground.set(config)
+            ground.redrawAll()
             movePiece(moves.shift())
             timeStart = new Date().getTime() 
             if (ids.length < 10){
@@ -204,10 +206,7 @@
 
         function resetGui(){
             console.log('RESET')
-            config.movable = {
-                color: 'both',
-                free: false 
-            }
+            config.viewOnly = true
             ground.set(config)
             score = 0
             $score.html(score)
